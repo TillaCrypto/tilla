@@ -1,0 +1,40 @@
+[project]
+name = "tilla-mcp"
+version = "2.0.0"
+description = "MCP server for TILLA - raw venue data, derived indicators and Bitcoin node data on one UTC clock. Let any AI agent pull model-ready market data directly."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "TILLA", email = "support@tillacrypto.com" }]
+keywords = ["mcp", "model-context-protocol", "crypto", "market-data", "macro",
+            "quant", "machine-learning", "bitcoin", "trading", "dataset", "ai-agent"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Financial and Insurance Industry",
+]
+dependencies = [
+  "mcp>=1.2.0,<2",   # official Model Context Protocol SDK (FastMCP). Pin below the v2 pre-release.
+  "httpx>=0.27",
+]
+
+[project.urls]
+Homepage = "https://tillacrypto.com"
+API = "https://api.tillacrypto.com"
+Documentation = "https://tillacrypto.com/docs"
+Repository = "https://github.com/TillaCrypto/tilla"
+
+[project.scripts]
+tilla-mcp = "tilla_mcp:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+# single-module package
+only-include = ["tilla_mcp.py"]
+
+[tool.hatch.build.targets.wheel.sources]
+"tilla_mcp.py" = "tilla_mcp.py"

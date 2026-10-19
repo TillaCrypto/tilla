@@ -1,0 +1,16 @@
+# never commit a key
+.env
+*.key
+# your local copies of the data
+*.db
+*.db-wal
+*.db-shm
+*.parquet
+*.csv
+# python
+__pycache__/
+*.pyc
+dist/
+build/
+*.egg-info/
+.venv/

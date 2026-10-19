@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.TillaCrypto/tilla-mcp",
+  "title": "TILLA - market data on one clock",
+  "description": "Crypto, US stocks, FX, rates, macro and Bitcoin node data on one clock, for any AI agent.",
+  "version": "2.0.0",
+  "repository": {
+    "url": "https://github.com/TillaCrypto/tilla",
+    "source": "github",
+    "subfolder": "mcp"
+  },
+  "websiteUrl": "https://tillacrypto.com",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "tilla-mcp",
+      "version": "2.0.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "TILLA_API_KEY",
+          "description": "Your TILLA API key (tk_live_...). Get a free one at https://tillacrypto.com",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "TILLA_API_BASE",
+          "description": "API base URL. Defaults to https://api.tillacrypto.com",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}
