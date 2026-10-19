@@ -1,4 +1,9 @@
-<p align="center"><img src="assets/tilla-logo.png" alt="TILLA" width="120"></p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/tilla-logo-white.png">
+    <img src="assets/tilla-logo.png" alt="TILLA" width="120">
+  </picture>
+</p>
 
 # TILLA
 
