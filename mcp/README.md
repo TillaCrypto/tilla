@@ -56,6 +56,9 @@ Every tool calls a real route of the API (`TOOL_ROUTES` in `tilla_mcp.py` names 
 | `tilla_market` | yes | One market (and optionally its related ones) on one clock | `GET /v1/<tier>/market/<id>` |
 | `tilla_sample` | no | The free sample of a plan: series per lane + one real row | `GET /v1/sample/<tier>` |
 | `tilla_health` | no | The newest bar of every lane - is the data current | `GET /v1/health` |
+| `tilla_docs` | no | The whole API manual in one call | `GET /llms-full.txt` + `GET /v1` |
+| `tilla_tick` | yes | Every series the key holds for the bar that just closed, one call | `GET /v1/<tier>/tick` |
+| `tilla_changes` | yes | Every value repaired since a time, so a kept copy stays correct | `GET /v1/<tier>/changes` |
 
 Resources: `tilla://about`, `tilla://tiers`.
 
@@ -67,6 +70,14 @@ Resources: `tilla://about`, `tilla://tiers`.
 | `TILLA_API_BASE` | `https://api.tillacrypto.com` | API base (dev: `http://127.0.0.1:8898`) |
 | `TILLA_MCP_TRANSPORT` | `stdio` | `stdio` (local) or `http` (remote) |
 | `TILLA_MCP_HOST` / `TILLA_MCP_PORT` | `127.0.0.1` / `8971` | HTTP bind |
+
+## Safe by design
+
+- **Read-only:** every tool is an HTTPS `GET` to `api.tillacrypto.com` (or `tillacrypto.com` for the docs). No tool
+  writes a file, runs a command, places a trade or touches a wallet.
+- **Your key** is read from `TILLA_API_KEY` and sent only to the TILLA API, never logged or returned to the agent.
+- **HTTP mode binds to `127.0.0.1`** unless you set `TILLA_MCP_HOST` yourself.
+- **Two dependencies,** both standard: the official `mcp` SDK and `httpx`.
 
 ## Notes for the agent
 

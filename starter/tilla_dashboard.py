@@ -10,6 +10,9 @@
 No key yet? It still runs: the same box on the clock, marked DEMO, so you can see the layout.
 Standard library only (Python 3.8+). Get a free key at https://tillacrypto.com
 """
+import calendar
+import csv
+import io
 import json
 import os
 import random
@@ -122,12 +125,37 @@ def group_of(layer, lane):
     return "drv1" if lane in ("1min", "5min", "10min", "15min", "30min") else "slow"
 
 
+# YOUR FILE (2026-10-28): every series named ONCE (`series`), every value one small row (`vals`: series id, the bar as
+# a unix time, the value), and a view `bars` that reads like a plain table - layer, lane, bar, series, value:
+#     SELECT * FROM bars WHERE lane = '1min'
+# Naming every series and bar in text on every row made the file several times the size of the data.
 def open_keep(path):
     db = sqlite3.connect(path, check_same_thread=False)
-    db.execute("CREATE TABLE IF NOT EXISTS bars (layer TEXT, lane TEXT, bar TEXT, series TEXT, value REAL, "
-               "PRIMARY KEY (layer, lane, bar, series))")
+    if db.execute("SELECT 1 FROM sqlite_master WHERE name='bars' AND type='table'").fetchone():
+        sys.exit("%s was written by an older version of this dashboard - start a new file with --keep" % path)
+    db.execute("CREATE TABLE IF NOT EXISTS series (id INTEGER PRIMARY KEY, layer TEXT, lane TEXT, name TEXT, "
+               "UNIQUE (layer, lane, name))")
+    db.execute("CREATE TABLE IF NOT EXISTS vals (sid INTEGER, t INTEGER, value REAL, PRIMARY KEY (sid, t)) WITHOUT ROWID")
+    db.execute("CREATE VIEW IF NOT EXISTS bars AS SELECT s.layer, s.lane, datetime(v.t, 'unixepoch') AS bar, "
+               "s.name AS series, v.value FROM vals v JOIN series s ON s.id = v.sid")
     db.execute("CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)")
     return db
+
+
+def _t(label):
+    """A bar label ('2026-10-28 12:05:00' or a bare date) as a unix time."""
+    s = str(label)[:19]
+    return calendar.timegm(time.strptime(s if len(s) > 10 else s + " 00:00:00", "%Y-%m-%d %H:%M:%S"))
+
+
+def _edge(db, ly, ln, fn):
+    """The first (fn='min') or last ('max') bar this file holds on a lane, as a label, or None."""
+    r = db.execute("SELECT %s(t) FROM vals WHERE sid IN (SELECT id FROM series WHERE layer=? AND lane=?)" % fn,
+                   (ly, ln)).fetchone()[0]
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(r)) if r is not None else None
+
+
+_SID = {}
 
 
 DB_LOCK = threading.Lock()
@@ -147,9 +175,9 @@ def heal(db, key, tier, quiet=False):
         with DB_LOCK:
             for name, bars in (d.get("lanes") or {}).items():
                 ly, ln = name.split("/")
-                first = db.execute("SELECT min(bar) FROM bars WHERE layer=? AND lane=?", (ly, ln)).fetchone()[0]
+                first = _edge(db, ly, ln, "min")
                 for bar, cells in bars.items():
-                    if first and bar >= first:           # only bars this file holds - never a half-filled old bar
+                    if first and _t(bar) >= _t(first):   # only bars this file holds - never a half-filled old bar
                         keep_rows(db, ly, ln, bar, list(cells), list(cells.values()))
                         total += len(cells)
             since = d.get("until") or since
@@ -171,25 +199,36 @@ def heal_loop(db, key, tier):
 
 
 def keep_rows(db, layer, lane, bar, series, values):
-    db.executemany("INSERT OR REPLACE INTO bars VALUES (?,?,?,?,?)",
-                   [(layer, lane, bar, s, v) for s, v in zip(series, values) if v is not None])
+    ids = []
+    for s in series:
+        k = (layer, lane, s)
+        if k not in _SID:
+            db.execute("INSERT OR IGNORE INTO series (layer, lane, name) VALUES (?,?,?)", k)
+            _SID[k] = db.execute("SELECT id FROM series WHERE layer=? AND lane=? AND name=?", k).fetchone()[0]
+        ids.append(_SID[k])
+    t = _t(bar)
+    db.executemany("INSERT OR REPLACE INTO vals VALUES (?,?,?)",
+                   [(i, t, v) for i, v in zip(ids, values) if v is not None])
 
 
 def resume(db, key, tier, lanes):
-    """Everything since the file's last bar on each lane (a new file starts one hour back)."""
+    """Everything since the file's last bar on each lane (a new file starts one hour back). As CSV: the series
+    names come once, in the header, not once per bar."""
     first = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() - 3600))
     total = 0
     for ly, ln in lanes:
-        since = db.execute("SELECT max(bar) FROM bars WHERE layer=? AND lane=?", (ly, ln)).fetchone()[0] or first
-        url = API + "/v1/%s/resume/%s/%s?" % (tier, ly, ln) + urllib.parse.urlencode({"since": since, "format": "ndjson"})
+        since = _edge(db, ly, ln, "max") or first
+        url = API + "/v1/%s/resume/%s/%s?" % (tier, ly, ln) + urllib.parse.urlencode({"since": since, "format": "csv"})
         req = urllib.request.Request(url, headers={"X-API-Key": key, "User-Agent": "tilla-dashboard/1.0"})
         try:
             with urllib.request.urlopen(req, timeout=300) as r:
-                for line in r:
-                    row = json.loads(line)
-                    bar = row.pop("timestamp", None)
-                    if bar:
-                        keep_rows(db, ly, ln, bar, list(row), list(row.values()))
+                head = None
+                for line in csv.reader(io.TextIOWrapper(r, encoding="utf-8")):
+                    if head is None:
+                        head = line[1:]
+                        continue
+                    if line and line[0]:
+                        keep_rows(db, ly, ln, line[0], head, [float(x) if x else None for x in line[1:]])
                         total += 1
         except Exception as e:                                              # noqa: BLE001
             print("  resume %s/%s: %s" % (ly, ln, e))
@@ -229,10 +268,17 @@ def live(key, tier, keep=None):
         got, lock = {}, threading.Lock()
 
         def ask(names):
-            try:
-                d = get("/v1/%s/tick" % tier, key, {"at": at, "lanes": ",".join(names), "wait": 45}, timeout=70)
-            except Exception as e:                                          # noqa: BLE001
-                d = {"lanes": {nm: {"error": str(e)} for nm in names}}
+            # the API holds this at most 45 s, so no answer by 55 s means the request was lost on the way:
+            # send it again rather than lose the minute
+            for attempt in range(3):
+                try:
+                    d = get("/v1/%s/tick" % tier, key, {"at": at, "lanes": ",".join(names), "wait": 45}, timeout=55)
+                    break
+                except Exception as e:                                      # noqa: BLE001
+                    d = {"lanes": {nm: {"error": str(e)} for nm in names}}
+                    if time.time() > B + 110:
+                        break
+                    time.sleep(1)
             with lock:
                 for nm, L in (d.get("lanes") or {}).items():
                     got[nm] = (L, time.time() - B)
@@ -251,10 +297,11 @@ def live(key, tier, keep=None):
             series = L.get("series") or []
             emp = L.get("empty") or {}
             sold = L.get("sold") or len(series)
-            have = sum(1 for v in vals if v is not None)
+            # the first `sold` series are the tier's; any after them are kept in the file but not counted
+            have = sum(1 for v in vals[:sold] if v is not None)
             owed = max(sold - (emp.get("none") or 0), 1)
             before = prev.get(nm) or {}
-            new = sum(1 for k, v in zip(series, vals) if v is not None and before.get(k) != v)
+            new = sum(1 for k, v in zip(series[:sold], vals[:sold]) if v is not None and before.get(k) != v)
             same = have - new
             prev[nm] = dict(zip(series, vals))
             if db:

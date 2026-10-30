@@ -54,6 +54,21 @@ python tilla_dashboard.py --keep tilla.db
 
 Free forever with no card. Paid plans add more markets, more history and more clocks: https://tillacrypto.com/pricing
 
+## Safe by design
+
+- **Read-only.** Everything here only reads market data from `api.tillacrypto.com` over HTTPS. Nothing places
+  trades, touches a wallet or reads your other files.
+- **Your key stays yours.** It is read from your own `.env` or environment and sent only to the TILLA API. No key is
+  in this repo, and `.gitignore` keeps `.env` out of any commit.
+- **What gets written:** only the SQLite file you name with `--keep` (the dashboard). The MCP server writes nothing.
+- **Open code, MIT licensed.** Read every line before you run it. The MCP server is one file:
+  [`mcp/tilla_mcp.py`](mcp/tilla_mcp.py).
+
+## Licence
+
+The code is MIT (see [LICENSE](LICENSE)). The market data you pull with it is governed by your TILLA plan terms:
+https://tillacrypto.com/docs
+
 ## Questions
 
 I answer every message myself: https://tillacrypto.com/contact, or a DM on X. Issues on this repo are welcome too.

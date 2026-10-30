@@ -1,7 +1,7 @@
 # TILLA starter package
 
 Every market - crypto, US stocks and ETFs, FX, indices, commodities, rates and macro - on one 1-minute clock,
-plus our own Bitcoin node and 293,780 pre-built derived series. This package gets you from a key to live data in
+plus our own Bitcoin node and 293,743 pre-built derived series. This package gets you from a key to live data in
 under five minutes.
 
 **What's inside**
@@ -40,6 +40,14 @@ One command does all three:
   your copy, so when a venue fixes a number, your file gets the fix too
 
 Stop it any time; start it again with the same key and the same file and it carries on, healing what it missed.
+
+Read the file like any SQLite table. The view `bars` holds every value as layer, lane, bar, series, value:
+```python
+import sqlite3, pandas as pd
+df = pd.read_sql("SELECT * FROM bars WHERE lane = '1min'", sqlite3.connect("tilla.db"))
+wide = df.pivot_table(index="bar", columns="series", values="value")   # one row per minute, one column per series
+```
+Each series is named once and each value is one small row, so the file stays close to the size of the data.
 
 ---
 
