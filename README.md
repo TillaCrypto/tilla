@@ -15,6 +15,32 @@ sync, an MCP server so your AI agent can pull the data itself, and three short e
 
 Site: https://tillacrypto.com · Docs: https://tillacrypto.com/docs · X: [@TillaCryptoHub](https://x.com/TillaCryptoHub)
 
+## Use it from your AI agent (MCP) - 30 seconds
+
+Give Claude, Cursor or any MCP client the whole market as tools (14 of them: latest bars, history, one market at a
+time, the live tick, repairs, plans):
+
+```
+pip install "mcp>=1.2,<2" httpx
+```
+
+```jsonc
+{
+  "mcpServers": {
+    "tilla": {
+      "command": "python",
+      "args": ["/path/to/tilla/mcp/tilla_mcp.py"],
+      "env": { "TILLA_API_KEY": "tk_live_your_key_here" }
+    }
+  }
+}
+```
+
+Then ask your agent things like *"BTC funding vs ETF flows this week"* or *"NVDA and BTC on one hourly chart"*.
+Full tool list: [`mcp/README.md`](mcp/README.md).
+
+<a href="https://glama.ai/mcp/servers/TillaCrypto/tilla"><img width="380" src="https://glama.ai/mcp/servers/TillaCrypto/tilla/badge" alt="TILLA MCP server on Glama" /></a>
+
 ## Get a free key (no account, no card)
 
 ```
