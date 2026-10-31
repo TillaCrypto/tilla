@@ -1,5 +1,5 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.TillaCrypto/tilla-mcp",
   "title": "TILLA - market data on one clock",
   "description": "Crypto, US stocks, FX, rates, macro and Bitcoin node data on one clock, for any AI agent.",
@@ -23,12 +23,14 @@
           "name": "TILLA_API_KEY",
           "description": "Your TILLA API key (tk_live_...). Get a free one at https://tillacrypto.com",
           "isRequired": true,
-          "isSecret": true
+          "isSecret": true,
+          "format": "string"
         },
         {
           "name": "TILLA_API_BASE",
           "description": "API base URL. Defaults to https://api.tillacrypto.com",
-          "isRequired": false
+          "isRequired": false,
+          "format": "string"
         }
       ]
     }

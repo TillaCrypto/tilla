@@ -21,20 +21,22 @@ Give Claude, Cursor or any MCP client the whole market as tools (14 of them: lat
 time, the live tick, repairs, plans):
 
 ```
-pip install "mcp>=1.2,<2" httpx
+pip install tilla-mcp
 ```
 
 ```jsonc
 {
   "mcpServers": {
     "tilla": {
-      "command": "python",
-      "args": ["/path/to/tilla/mcp/tilla_mcp.py"],
+      "command": "tilla-mcp",
       "env": { "TILLA_API_KEY": "tk_live_your_key_here" }
     }
   }
 }
 ```
+
+With [uv](https://docs.astral.sh/uv/) there is nothing to install: `"command": "uvx", "args": ["tilla-mcp"]`.
+A Postman collection of the API is in [`postman/`](postman).
 
 Then ask your agent things like *"BTC funding vs ETF flows this week"* or *"NVDA and BTC on one hourly chart"*.
 Full tool list: [`mcp/README.md`](mcp/README.md).

@@ -31,7 +31,7 @@ First `pip install "mcp>=1.2,<2" httpx`, then point your client at `tilla_mcp.py
 }
 ```
 
-Once `tilla-mcp` is published on PyPI, `"command": "uvx", "args": ["tilla-mcp"]` will work too, with nothing to download.
+Or install it from PyPI (`pip install tilla-mcp`) and use `"command": "tilla-mcp"` - or with uv, nothing to install: `"command": "uvx", "args": ["tilla-mcp"]`.
 ### Remote / hosted (streamable HTTP)
 
 ```bash

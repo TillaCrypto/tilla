@@ -1,0 +1,601 @@
+{
+  "info": {
+    "name": "TILLA - market data on one clock",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "# TILLA - market data on one clock\n\nCrypto, US stocks, FX, rates, macro, every BTC/ETH spot ETF fund and our own Bitcoin node on one UTC clock, 1-minute to quarterly, with 293,743 indicators computed with no look-ahead.\n\n## Start in 30 seconds\n1. Get a free key (no card): https://tillacrypto.com - or run **1. Start here > Get a free key**.\n2. Open this collection's **Variables** tab and paste your key into `apiKey`.\n3. Run **Is the API live?**, then anything in **2. Market data**.\n\n`tier` is your plan (free, builder, pro, max). Paid plans add more markets, history and clocks: https://tillacrypto.com/pricing\n\nDocs: https://tillacrypto.com/docs \u00b7 AI agents (MCP): https://tillacrypto.com/mcp \u00b7 Support: support@tillacrypto.com"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-API-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.tillacrypto.com"
+    },
+    {
+      "key": "apiKey",
+      "value": "paste-your-free-key-here"
+    },
+    {
+      "key": "tier",
+      "value": "free"
+    },
+    {
+      "key": "since",
+      "value": "2026-10-30 00:00:00"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Start here (no key needed)",
+      "description": "Everything here works without a key.",
+      "item": [
+        {
+          "name": "Is the API live?",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "status"
+              ]
+            },
+            "description": "The newest 1-minute bar and the plans served.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Plans, prices and limits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/tiers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "tiers"
+              ]
+            },
+            "description": "Every plan: price, history, requests a minute.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Every market we carry",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/markets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "markets"
+              ]
+            },
+            "description": "Crypto, US stocks and ETFs, FX and macro - each with its category, related markets and how much each plan holds.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Is every lane current?",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "health"
+              ]
+            },
+            "description": "The newest bar of every lane on every layer.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Every call, ready to paste",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/calls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "calls"
+              ]
+            },
+            "description": "Every call with a working URL, what it returns and every error.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Free sample - one tick of the Free plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/sample/free",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "sample",
+                "free"
+              ]
+            },
+            "description": "Real values, no key.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get a free key (no account)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/demo_key",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "demo_key"
+              ]
+            },
+            "description": "One free key per address per day. Paste the key into the collection's apiKey variable. For a key tied to an account, sign up at https://tillacrypto.com.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Market data",
+      "description": "Bars are labelled by their close, in UTC. No start = the newest bars. Page forward with next_start while more is true.",
+      "item": [
+        {
+          "name": "Latest BTC and ETH price (1-minute)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/raw/1min?series=btc_close,eth_close&limit=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "raw",
+                "1min"
+              ],
+              "query": [
+                {
+                  "key": "series",
+                  "value": "btc_close,eth_close"
+                },
+                {
+                  "key": "limit",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "The newest closed 1-minute bar."
+          }
+        },
+        {
+          "name": "BTC hourly candles, last 24 hours",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/raw/hour?series=btc_open,btc_high,btc_low,btc_close,btc_volume&limit=24",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "raw",
+                "hour"
+              ],
+              "query": [
+                {
+                  "key": "series",
+                  "value": "btc_open,btc_high,btc_low,btc_close,btc_volume"
+                },
+                {
+                  "key": "limit",
+                  "value": "24"
+                }
+              ]
+            },
+            "description": "Open, high, low, close, volume."
+          }
+        },
+        {
+          "name": "BTC beside DXY, VIX and Fear & Greed (daily)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/raw/daily?series=btc_close,dxy_close,vix_close,fear_greed&limit=30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "raw",
+                "daily"
+              ],
+              "query": [
+                {
+                  "key": "series",
+                  "value": "btc_close,dxy_close,vix_close,fear_greed"
+                },
+                {
+                  "key": "limit",
+                  "value": "30"
+                }
+              ]
+            },
+            "description": "Crypto and macro on one clock."
+          }
+        },
+        {
+          "name": "Indicators: RSI, EMA, ATR, correlation (hourly)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/derived/1hour?series=btc_rsi_14,btc_ema_20,btc_atr_14,btc_corr_30_eth&limit=24",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "derived",
+                "1hour"
+              ],
+              "query": [
+                {
+                  "key": "series",
+                  "value": "btc_rsi_14,btc_ema_20,btc_atr_14,btc_corr_30_eth"
+                },
+                {
+                  "key": "limit",
+                  "value": "24"
+                }
+              ]
+            },
+            "description": "Computed bar by bar with no look-ahead."
+          }
+        },
+        {
+          "name": "One whole market on one clock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/market/btc?lane=1min",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "market",
+                "btc"
+              ],
+              "query": [
+                {
+                  "key": "lane",
+                  "value": "1min"
+                }
+              ]
+            },
+            "description": "Every series of one market your plan holds. related=1 adds its ETFs and miners."
+          }
+        },
+        {
+          "name": "History back to 2017 (hourly)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/deep/hour?series=btc_close&start=2018-01-01&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "deep",
+                "hour"
+              ],
+              "query": [
+                {
+                  "key": "series",
+                  "value": "btc_close"
+                },
+                {
+                  "key": "start",
+                  "value": "2018-01-01"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "The deep history: hourly prices from each market's first bar (crypto 2017, FX 2002)."
+          }
+        },
+        {
+          "name": "Same data as CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/raw/daily?series=btc_close,eth_close&limit=30&format=csv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "raw",
+                "daily"
+              ],
+              "query": [
+                {
+                  "key": "series",
+                  "value": "btc_close,eth_close"
+                },
+                {
+                  "key": "limit",
+                  "value": "30"
+                },
+                {
+                  "key": "format",
+                  "value": "csv"
+                }
+              ]
+            },
+            "description": "Add format=csv (or ndjson, parquet) to any data call."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Live and keep in sync",
+      "description": "How a bot or a local copy stays current.",
+      "item": [
+        {
+          "name": "Everything that just closed (tick)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/tick",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "tick"
+              ]
+            },
+            "description": "Every series your key holds, on every lane that closed at this minute, in one answer."
+          }
+        },
+        {
+          "name": "Refill after downtime (resume)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/resume/raw/1min?since={{since}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "resume",
+                "raw",
+                "1min"
+              ],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "{{since}}"
+                }
+              ]
+            },
+            "description": "Every bar since you stopped, in one request."
+          }
+        },
+        {
+          "name": "Corrections since a time (changes)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/changes?since={{since}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "changes"
+              ],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "{{since}}"
+                }
+              ]
+            },
+            "description": "Every value a source corrected later, with its value now - apply them and your copy stays right."
+          }
+        },
+        {
+          "name": "Live stream (server-sent events)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/stream?layer=raw&lanes=1min&series=btc_close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "stream"
+              ],
+              "query": [
+                {
+                  "key": "layer",
+                  "value": "raw"
+                },
+                {
+                  "key": "lanes",
+                  "value": "1min"
+                },
+                {
+                  "key": "series",
+                  "value": "btc_close"
+                }
+              ]
+            },
+            "description": "Finished bars as they land."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Your key",
+      "item": [
+        {
+          "name": "What my key holds",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/inventory?layer=raw&lane=1min",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "inventory"
+              ],
+              "query": [
+                {
+                  "key": "layer",
+                  "value": "raw"
+                },
+                {
+                  "key": "lane",
+                  "value": "1min"
+                }
+              ]
+            },
+            "description": "Every series name per layer and lane. Use these names - never guess one."
+          }
+        },
+        {
+          "name": "My plan and budget right now",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/usage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "usage"
+              ]
+            },
+            "description": "Plan, history, limits, used today."
+          }
+        },
+        {
+          "name": "Every call for my plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/{{tier}}/calls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "{{tier}}",
+                "calls"
+              ]
+            },
+            "description": "Every call your plan can make, with ready URLs."
+          }
+        }
+      ]
+    }
+  ]
+}
