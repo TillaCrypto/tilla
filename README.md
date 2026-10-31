@@ -66,8 +66,8 @@ JSON, CSV, NDJSON or Parquet (`format=`). A [Postman collection](postman) has ev
 |---|---|
 | [`starter/`](starter) | `tilla_dashboard.py`: a live terminal dashboard that keeps a SQLite copy current - **resume** what you missed, **tick** every new bar, **heal** what a source corrected. Standard library only. |
 | [`mcp/`](mcp) | `tilla_mcp.py`: the MCP server (also `pip install tilla-mcp`) |
-| [`examples/`](examples) | three short scripts: a first call, every coin's close in one call, a day of data in pandas |
-| [`postman/`](postman) | the API as a Postman collection |
+| [`examples/`](examples) | a first call, every coin's close in one call, a day of data in pandas, `one_clock.ipynb` (30 days of crypto and macro on one clock, free plan), `langchain_tools.py` (TILLA as LangChain tools) and `n8n_tilla_workflow.json` (import into n8n) |
+| [`postman/`](postman) | the API as a Postman collection; Insomnia and other clients import `https://api.tillacrypto.com/openapi.json` |
 
 ```
 cd starter
