@@ -6,31 +6,28 @@ Protocol tools. Once a user adds this server to their agent (Claude Desktop /
 Claude Code / Cursor / any MCP client), the agent can query TILLA on its own —
 no browser, no copy-paste.
 
-REWRITTEN 2026-10-10 ONTO THE CALLS THE API ACTUALLY HAS. The July version called
-/v1/schema, /v1/features and /download/<tier>.json, none of which the rebuilt API
-serves, so every one of those tools answered an error (1_FOUND R220). Every tool
-below maps to a route in api/server.py's ENDPOINTS list, and `TOOL_ROUTES` names
-the route each one uses so a test can hold the two against each other.
+Every tool maps to one route of the API; `TOOL_ROUTES` names it.
 
-WHAT IT IS (so the agent knows how to describe it):
-  Raw venue data, derived indicators and our own Bitcoin node — crypto spot and
-  derivatives, equities and ETFs, FX, rates and macro — every value on one UTC
-  clock, every bar hashed as it lands. Tiers are nested; the tier is in the path.
+What it serves:
+  Raw venue data, derived indicators and our own Bitcoin node - crypto spot and
+  derivatives, equities and ETFs, FX, rates and macro - every value on one UTC
+  clock. Plans are nested; the plan is in the path.
 
-AUTH:
+Auth:
   Set TILLA_API_KEY to a key (tk_live_...). Get a free one at
   https://tillacrypto.com, or POST /v1/demo_key for one with no account.
-  The keyless tools (about, status, tiers) work without a key.
+  The keyless tools (about, status, tiers, markets, sample, health, docs) work
+  without a key.
 
-CONFIG (env):
+Config (env):
   TILLA_API_KEY        the caller's key. Optional for the keyless tools.
   TILLA_API_BASE       default https://api.tillacrypto.com  (dev: http://127.0.0.1:8898)
   TILLA_MCP_TRANSPORT  "stdio" (default, for local agents) or "http" (remote/hosted)
   TILLA_MCP_HOST       http transport bind host (default 127.0.0.1)
   TILLA_MCP_PORT       http transport port    (default 8971)
 
-RUN:
-  Local (stdio):   uvx tilla-mcp            (or:  python tilla_mcp.py)
+Run:
+  Local (stdio):   python tilla_mcp.py
   Remote (http):   TILLA_MCP_TRANSPORT=http python tilla_mcp.py
 """
 from __future__ import annotations
@@ -46,7 +43,7 @@ SIGNUP_URL = "https://tillacrypto.com"
 TIMEOUT = httpx.Timeout(30.0, connect=8.0)
 LAYERS = ("raw", "derived", "node", "deep")   # deep: the hourly history before 2023-08-10
 
-# THE ROUTE EACH TOOL CALLS - held against the API's ENDPOINTS by the test (mode E).
+# The API route each tool calls.
 TOOL_ROUTES = {
     "tilla_status": ("GET", "/v1/status"),
     "tilla_tiers": ("GET", "/v1/tiers"),
@@ -219,7 +216,7 @@ def tilla_markets() -> dict:
 
 def tilla_market(market: str, lane: str = "1min", layer: str = "raw", related: bool = False,
                  period: str | None = None, limit: int = 500) -> dict:
-    """ONE MARKET in one call: every series of `market` (an id from tilla_markets, e.g. btc, nvda, eurusd, gold) the
+    """One market in one call: every series of `market` (an id from tilla_markets, e.g. btc, nvda, eurusd, gold) the
     key holds on `lane`, on one clock. layer = raw | derived | node | deep | all. related=True adds its connected
     markets (btc: its ETFs and miners). period = 1d 7d 30d 2m 3m 6m 1y 2y 3y all. At most 200 columns an answer:
     `series_next_offset` names the next page. Needs TILLA_API_KEY."""
@@ -247,7 +244,7 @@ def tilla_health() -> dict:
 
 
 def tilla_docs() -> dict:
-    """THE WHOLE API MANUAL in one call, no key needed: every call, every parameter, every plan, how paging, tick,
+    """The whole API manual in one call, no key needed: every call, every parameter, every plan, how paging, tick,
     resume, changes and bulk work. Read this first when you need to know how to do anything."""
     try:
         with httpx.Client(timeout=TIMEOUT) as c:
@@ -258,7 +255,7 @@ def tilla_docs() -> dict:
 
 
 def tilla_tick(at: str | None = None, lanes: str | None = None) -> dict:
-    """THE WHOLE TIER, LIVE, ONE CALL: every series the key holds on every lane that closed at a boundary (`at` =
+    """Your whole plan, live, in one call: every series the key holds on every lane that closed at a boundary (`at` =
     'YYYY-MM-DD HH:MM', default the minute just closed). Per lane: bar, complete, series, values. Needs a key."""
     t = _my_tier()
     if isinstance(t, dict):
@@ -267,7 +264,7 @@ def tilla_tick(at: str | None = None, lanes: str | None = None) -> dict:
 
 
 def tilla_changes(since: str) -> dict:
-    """EVERY CELL OUR CHECKS REPAIRED since `since` ('YYYY-MM-DD HH:MM:SS') that the key holds, with its value now -
+    """Every value our checks repaired since `since` ('YYYY-MM-DD HH:MM:SS') that the key holds, with its value now -
     apply them and a kept copy stays correct. Pass the answer's `until` as the next since. Needs a key."""
     t = _my_tier()
     if isinstance(t, dict):

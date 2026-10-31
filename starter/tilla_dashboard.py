@@ -125,10 +125,10 @@ def group_of(layer, lane):
     return "drv1" if lane in ("1min", "5min", "10min", "15min", "30min") else "slow"
 
 
-# YOUR FILE (2026-10-28): every series named ONCE (`series`), every value one small row (`vals`: series id, the bar as
-# a unix time, the value), and a view `bars` that reads like a plain table - layer, lane, bar, series, value:
+# Your file: every series is named once (`series`), every value is one small row (`vals`: series id, the bar as a
+# unix time, the value), and the view `bars` reads like a plain table - layer, lane, bar, series, value:
 #     SELECT * FROM bars WHERE lane = '1min'
-# Naming every series and bar in text on every row made the file several times the size of the data.
+# This keeps the file close to the size of the data.
 def open_keep(path):
     db = sqlite3.connect(path, check_same_thread=False)
     if db.execute("SELECT 1 FROM sqlite_master WHERE name='bars' AND type='table'").fetchone():
