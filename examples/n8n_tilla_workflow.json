@@ -1,0 +1,35 @@
+{
+  "name": "TILLA - newest BTC and ETH bar every minute",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [ { "field": "minutes", "minutesInterval": 1 } ] } },
+      "name": "Every minute",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://api.tillacrypto.com/v1/free/raw/1min",
+        "sendQuery": true,
+        "queryParameters": { "parameters": [
+          { "name": "series", "value": "btc_close,eth_close" },
+          { "name": "limit", "value": "1" }
+        ] },
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "X-API-Key", "value": "={{ $env.TILLA_API_KEY }}" }
+        ] },
+        "options": {}
+      },
+      "name": "TILLA newest bar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 0]
+    }
+  ],
+  "connections": {
+    "Every minute": { "main": [ [ { "node": "TILLA newest bar", "type": "main", "index": 0 } ] ] }
+  },
+  "settings": {}
+}
