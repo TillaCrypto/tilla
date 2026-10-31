@@ -69,7 +69,7 @@ window, market, tick, changes, usage, health and more.
 
 Easiest: `pip install tilla-mcp` and use `"command": "tilla-mcp"` (see [`../mcp`](../mcp)). Or run the file here:
 
-1. `pip install "mcp>=1.2,<2" httpx`
+1. `pip install "mcp>=1.9,<2" httpx`
 2. Add this to your MCP client's config, with the full path to the file:
 ```
 {

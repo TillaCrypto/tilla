@@ -1,6 +1,6 @@
 [project]
 name = "tilla-mcp"
-version = "2.0.0"
+version = "2.0.1"
 description = "MCP server for TILLA - raw venue data, derived indicators and Bitcoin node data on one UTC clock. Let any AI agent pull model-ready market data directly."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -15,7 +15,7 @@ classifiers = [
   "Intended Audience :: Financial and Insurance Industry",
 ]
 dependencies = [
-  "mcp>=1.2.0,<2",   # official Model Context Protocol SDK (FastMCP). Pin below the v2 pre-release.
+  "mcp>=1.9.0,<2",   # official Model Context Protocol SDK (FastMCP, tool annotations). Below v2.
   "httpx>=0.27",
 ]
 

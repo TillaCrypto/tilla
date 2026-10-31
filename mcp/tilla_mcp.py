@@ -283,12 +283,27 @@ TOOLS = (tilla_about, tilla_status, tilla_tiers, tilla_inventory, tilla_window, 
 
 
 # ── MCP registration - only when the server actually runs ─────────────────────
+TITLES = {
+    "tilla_about": "About TILLA", "tilla_status": "Feed status", "tilla_tiers": "Plans and limits",
+    "tilla_inventory": "Series this key holds", "tilla_window": "Bars in a time range",
+    "tilla_latest": "Latest bar", "tilla_usage": "Plan and budget", "tilla_markets": "Every market",
+    "tilla_market": "One whole market", "tilla_sample": "Free sample of a plan", "tilla_health": "Is every lane current",
+    "tilla_docs": "The API manual", "tilla_tick": "Everything that just closed",
+    "tilla_changes": "Corrections since a time",
+}
+
+
 def build():
     from mcp.server.fastmcp import FastMCP
+    from mcp.types import ToolAnnotations
     mcp = FastMCP("tilla", host=os.environ.get("TILLA_MCP_HOST", "127.0.0.1"),
                   port=int(os.environ.get("TILLA_MCP_PORT", "8971")), instructions=INSTRUCTIONS)
     for fn in TOOLS:
-        mcp.tool()(fn)
+        # Every tool only reads from the TILLA API: read-only, never destructive, safe to repeat, and it reaches
+        # one outside service (the API), so openWorld.
+        mcp.tool(title=TITLES[fn.__name__],
+                 annotations=ToolAnnotations(title=TITLES[fn.__name__], readOnlyHint=True, destructiveHint=False,
+                                             idempotentHint=True, openWorldHint=True))(fn)
 
     @mcp.resource("tilla://about")
     def about_resource() -> str:

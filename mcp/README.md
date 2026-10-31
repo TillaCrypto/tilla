@@ -33,7 +33,7 @@ pip install tilla-mcp
 ```
 
 With uv, nothing to install: `"command": "uvx", "args": ["tilla-mcp"]`. Or run this folder's file directly:
-`pip install "mcp>=1.2,<2" httpx`, then `"command": "python", "args": ["/path/to/tilla_mcp.py"]`.
+`pip install "mcp>=1.9,<2" httpx`, then `"command": "python", "args": ["/path/to/tilla_mcp.py"]`.
 
 ### Remote / hosted (streamable HTTP)
 
