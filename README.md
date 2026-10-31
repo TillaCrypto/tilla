@@ -7,18 +7,20 @@
 
 # TILLA
 
-Market data for people building trading models, bots and AI agents: crypto, US stocks and ETFs, FX, indices,
-commodities, rates and macro on one 1-minute clock, plus data from a Bitcoin node I run myself.
+Market data for trading models, bots and AI agents. Crypto, US stocks and ETFs, FX, rates and macro on **one UTC
+clock**, from 1-minute bars to quarterly.
 
-This repo is everything you need to start, free: a live terminal dashboard that keeps a local copy of the data in
-sync, an MCP server so your AI agent can pull the data itself, and three short examples.
+- **Every market lines up.** BTC, NVDA, EUR/USD, the 10-year yield and VIX share the same timestamp. No joins, no drift.
+- **Bitcoin and Ether spot ETF flows, fund by fund**, daily, next to price, funding and open interest.
+- **293,743 derived indicators**, computed bar by bar with no look-ahead.
+- **Our own Bitcoin node**: blocks, mempool and fees on the same clock as the market.
+- **Your copy never breaks.** Go offline and one call refills every missed bar; a second call delivers every value a
+  source corrected later.
+- **History**: hourly crypto from 2017, FX from 2002.
 
-Site: https://tillacrypto.com · Docs: https://tillacrypto.com/docs · X: [@TillaCryptoHub](https://x.com/TillaCryptoHub)
+Site: https://tillacrypto.com · Docs: https://tillacrypto.com/docs · Plans: https://tillacrypto.com/pricing
 
-## Use it from your AI agent (MCP) - 30 seconds
-
-Give Claude, Cursor or any MCP client the whole market as tools (14 of them: latest bars, history, one market at a
-time, the live tick, repairs, plans):
+## In your AI agent (MCP)
 
 ```
 pip install tilla-mcp
@@ -36,67 +38,60 @@ pip install tilla-mcp
 ```
 
 With [uv](https://docs.astral.sh/uv/) there is nothing to install: `"command": "uvx", "args": ["tilla-mcp"]`.
-A Postman collection of the API is in [`postman/`](postman).
 
-Then ask your agent things like *"BTC funding vs ETF flows this week"* or *"NVDA and BTC on one hourly chart"*.
-Full tool list: [`mcp/README.md`](mcp/README.md).
+14 tools for Claude, Cursor or any MCP client: latest bars, history, one whole market at a time, the live tick,
+corrections and plans. Ask things like *"BTC price against spot ETF flows this month"* or *"NVDA and BTC on one
+hourly chart"*. Tool list: [`mcp/README.md`](mcp/README.md).
 
 <a href="https://glama.ai/mcp/servers/TillaCrypto/tilla"><img width="380" src="https://glama.ai/mcp/servers/TillaCrypto/tilla/badge" alt="TILLA MCP server on Glama" /></a>
 
-## Get a free key (no account, no card)
+## A key and a first call
+
+A free key, no account and no card:
 
 ```
 curl -X POST https://api.tillacrypto.com/v1/demo_key
 ```
-
-Or sign up at https://tillacrypto.com for a free key tied to your account.
-
-## Your first call
 
 ```
 curl -H "X-API-Key: tk_live_YOUR_KEY" "https://api.tillacrypto.com/v1/free/raw/1min?series=btc_close,eth_close&limit=5"
 ```
 
 Every bar is labelled by its close, in UTC. A value a source never published stays empty; nothing is guessed.
+JSON, CSV, NDJSON or Parquet (`format=`). A [Postman collection](postman) has every call ready to run.
 
 ## What's in here
 
-| Folder | What it does |
+| Folder | What it is |
 |---|---|
-| [`starter/`](starter) | `tilla_dashboard.py` - one command keeps a SQLite copy current: **resume** what you missed, **tick** every new bar, **heal** values a source corrected later. Standard library only. |
-| [`mcp/`](mcp) | `tilla_mcp.py` - the MCP server for Claude, Cursor or any MCP client |
-| [`examples/`](examples) | three short scripts: your first call, every coin's close in one call, a day of data into pandas |
+| [`starter/`](starter) | `tilla_dashboard.py`: a live terminal dashboard that keeps a SQLite copy current - **resume** what you missed, **tick** every new bar, **heal** what a source corrected. Standard library only. |
+| [`mcp/`](mcp) | `tilla_mcp.py`: the MCP server (also `pip install tilla-mcp`) |
+| [`examples/`](examples) | three short scripts: a first call, every coin's close in one call, a day of data in pandas |
+| [`postman/`](postman) | the API as a Postman collection |
 
 ```
 cd starter
 python tilla_dashboard.py --keep tilla.db
 ```
 
-## The three calls the dashboard is built on
+## The three calls behind it
 
 - **Tick** - `GET /v1/<tier>/tick` - every series your plan holds for the bar that just closed, in one answer
 - **Resume** - `GET /v1/<tier>/resume/<layer>/<lane>?since=...` - every bar since you stopped, streamed
-- **Heal** - `GET /v1/<tier>/changes?since=...` - every value corrected since a time, so your copy gets the fix
+- **Changes** - `GET /v1/<tier>/changes?since=...` - every value corrected since a time, so your copy gets the fix
 
-## Plans
+## Safe to run
 
-Free forever with no card. Paid plans add more markets, more history and more clocks: https://tillacrypto.com/pricing
+Everything here only reads market data from `api.tillacrypto.com` over HTTPS. Nothing trades, touches a wallet or
+reads your other files. Your key stays in your own `.env` or environment and goes only to the TILLA API. The only
+thing written is the SQLite file you name with `--keep`.
 
-## Safe by design
+## License
 
-- **Read-only.** Everything here only reads market data from `api.tillacrypto.com` over HTTPS. Nothing places
-  trades, touches a wallet or reads your other files.
-- **Your key stays yours.** It is read from your own `.env` or environment and sent only to the TILLA API. No key is
-  in this repo, and `.gitignore` keeps `.env` out of any commit.
-- **What gets written:** only the SQLite file you name with `--keep` (the dashboard). The MCP server writes nothing.
-- **Open code, MIT licensed.** Read every line before you run it. The MCP server is one file:
-  [`mcp/tilla_mcp.py`](mcp/tilla_mcp.py).
-
-## Licence
-
-The code is MIT (see [LICENSE](LICENSE)). The market data you pull with it is governed by your TILLA plan terms:
+The code is MIT ([LICENSE](LICENSE)). The data you pull with it is covered by your TILLA plan:
 https://tillacrypto.com/docs
 
-## Questions
+## Contact
 
-I answer every message myself: https://tillacrypto.com/contact, or a DM on X. Issues on this repo are welcome too.
+I answer every message myself: https://tillacrypto.com/contact, [@TillaCryptoHub](https://x.com/TillaCryptoHub) on X,
+or an issue on this repo.

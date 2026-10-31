@@ -1,8 +1,8 @@
 """A tiny helper the examples share: your key from the environment (or starter/.env), and one GET.
 Standard library only."""
 import json
-import urllib.error
 import os
+import urllib.error
 import urllib.parse
 import urllib.request
 

@@ -2,9 +2,9 @@
 
 **Let your AI agent pull TILLA's market data directly.**
 
-[TILLA](https://tillacrypto.com) serves raw venue data, derived indicators computed from it bar by bar
-with no look-ahead, and blocks and mempool data from our own Bitcoin node - crypto spot and derivatives,
-equities and ETFs, FX, rates and macro - every value on one UTC clock, every bar hashed as it lands.
+[TILLA](https://tillacrypto.com) serves crypto spot and derivatives, US stocks and ETFs, FX, rates, macro,
+fund-by-fund Bitcoin and Ether spot ETF flows and blocks and mempool data from our own Bitcoin node - every value on
+one UTC clock - plus 293,743 indicators computed bar by bar with no look-ahead.
 
 This is the official [Model Context Protocol](https://modelcontextprotocol.io) server. Add it to any MCP
 client and your agent can query TILLA on its own.
@@ -17,21 +17,24 @@ client and your agent can query TILLA on its own.
 
 ### Claude Desktop / Claude Code / Cursor (local, stdio)
 
-First `pip install "mcp>=1.2,<2" httpx`, then point your client at `tilla_mcp.py` in this folder:
+```
+pip install tilla-mcp
+```
 
 ```jsonc
 {
   "mcpServers": {
     "tilla": {
-      "command": "python",
-      "args": ["/path/to/tilla_mcp.py"],
+      "command": "tilla-mcp",
       "env": { "TILLA_API_KEY": "tk_live_your_key_here" }
     }
   }
 }
 ```
 
-Or install it from PyPI (`pip install tilla-mcp`) and use `"command": "tilla-mcp"` - or with uv, nothing to install: `"command": "uvx", "args": ["tilla-mcp"]`.
+With uv, nothing to install: `"command": "uvx", "args": ["tilla-mcp"]`. Or run this folder's file directly:
+`pip install "mcp>=1.2,<2" httpx`, then `"command": "python", "args": ["/path/to/tilla_mcp.py"]`.
+
 ### Remote / hosted (streamable HTTP)
 
 ```bash

@@ -5,7 +5,7 @@ plus our own Bitcoin node and 293,743 pre-built derived series. This package get
 under five minutes.
 
 **What's inside**
-- `.env` - put your key here
+- `.env.example` - rename it to `.env` and put your key in it
 - `tilla_dashboard.py` - a live terminal dashboard (one box per tick) that can also keep your own copy: resume, tick, heal
 - `tilla_mcp.py` - the MCP server, so an AI agent (Claude, Cursor, any MCP client) can pull the data itself
 - `README.md` - this file
@@ -66,6 +66,8 @@ No key yet? `python tilla_dashboard.py` still runs and shows the layout, marked 
 
 `tilla_mcp.py` gives any MCP client (Claude Desktop, Claude Code, Cursor ...) the API as tools: inventory, latest,
 window, market, tick, changes, usage, health and more.
+
+Easiest: `pip install tilla-mcp` and use `"command": "tilla-mcp"` (see [`../mcp`](../mcp)). Or run the file here:
 
 1. `pip install "mcp>=1.2,<2" httpx`
 2. Add this to your MCP client's config, with the full path to the file:
