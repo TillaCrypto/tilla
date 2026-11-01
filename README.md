@@ -39,6 +39,13 @@ pip install tilla-mcp
 
 With [uv](https://docs.astral.sh/uv/) there is nothing to install: `"command": "uvx", "args": ["tilla-mcp"]`.
 
+**Or nothing to install at all - the hosted server:** `https://mcp.tillacrypto.com/mcp` (streamable HTTP). Send your
+key as the `X-API-Key` header (or `Authorization: Bearer <key>`, or `?key=<key>`); the free tools answer without one.
+
+```json
+{ "mcpServers": { "tilla": { "url": "https://mcp.tillacrypto.com/mcp", "headers": { "X-API-Key": "tk_live_..." } } } }
+```
+
 14 tools for Claude, Cursor or any MCP client: latest bars, history, one whole market at a time, the live tick,
 corrections and plans. Ask things like *"BTC price against spot ETF flows this month"* or *"NVDA and BTC on one
 hourly chart"*. Tool list: [`mcp/README.md`](mcp/README.md).

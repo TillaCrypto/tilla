@@ -35,11 +35,20 @@ pip install tilla-mcp
 With uv, nothing to install: `"command": "uvx", "args": ["tilla-mcp"]`. Or run this folder's file directly:
 `pip install "mcp>=1.9,<2" httpx`, then `"command": "python", "args": ["/path/to/tilla_mcp.py"]`.
 
-### Remote / hosted (streamable HTTP)
+### Hosted - nothing to install
+
+`https://mcp.tillacrypto.com/mcp` (streamable HTTP). Each caller sends their own key: `X-API-Key: <key>`, or
+`Authorization: Bearer <key>`, or `?key=<key>` on the URL. Without a key the free tools still answer.
+
+```json
+{ "mcpServers": { "tilla": { "url": "https://mcp.tillacrypto.com/mcp", "headers": { "X-API-Key": "tk_live_..." } } } }
+```
+
+### Run your own over HTTP
 
 ```bash
-TILLA_MCP_TRANSPORT=http TILLA_API_KEY=tk_live_... python tilla_mcp.py
-# serves MCP over http://127.0.0.1:8971/mcp  (front with TLS for a public connector)
+TILLA_MCP_TRANSPORT=http python tilla_mcp.py
+# serves MCP over http://127.0.0.1:8971/mcp; each request carries its own key as above
 ```
 
 ## Tools

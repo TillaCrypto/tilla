@@ -1,6 +1,6 @@
 [project]
 name = "tilla-mcp"
-version = "2.0.1"
+version = "2.0.2"
 description = "MCP server for TILLA - raw venue data, derived indicators and Bitcoin node data on one UTC clock. Let any AI agent pull model-ready market data directly."
 readme = "README.md"
 requires-python = ">=3.10"

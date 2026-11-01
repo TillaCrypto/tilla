@@ -29,6 +29,8 @@ Config (env):
 Run:
   Local (stdio):   python tilla_mcp.py
   Remote (http):   TILLA_MCP_TRANSPORT=http python tilla_mcp.py
+                   (hosted at https://mcp.tillacrypto.com/mcp: each caller sends its own key as X-API-Key,
+                   Authorization: Bearer or ?key=; TILLA_API_KEY is ignored there)
 """
 from __future__ import annotations
 
@@ -67,18 +69,54 @@ INSTRUCTIONS = (
 
 
 # ── http helpers ──────────────────────────────────────────────────────────────
+_MCP = None      # the running FastMCP, set by build()
+HOSTED = False   # True when served over http (mcp.tillacrypto.com): every caller brings its OWN key
+
+
+def _request():
+    """The caller's HTTP request when hosted, else None."""
+    if not (HOSTED and _MCP is not None):
+        return None
+    try:
+        return _MCP.get_context().request_context.request
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _key() -> str:
+    """Local (stdio): TILLA_API_KEY. Hosted: the caller's own key from X-API-Key, Authorization: Bearer or
+    ?key= - NEVER the server's environment, so a hosted server can never hand one caller another's plan."""
+    if not HOSTED:
+        return API_KEY
+    req = _request()
+    if req is None:
+        return ""
+    k = req.headers.get("x-api-key") or ""
+    a = req.headers.get("authorization") or ""
+    if not k and a.lower().startswith("bearer "):
+        k = a[7:]
+    return (k or req.query_params.get("key") or "").strip()
+
+
 def _headers(auth: bool) -> dict:
     h = {"Accept": "application/json", "User-Agent": "tilla-mcp/2.0"}
-    if auth and API_KEY:
-        h["X-API-Key"] = API_KEY
+    k = _key()
+    if auth and k:
+        h["X-API-Key"] = k
+    req = _request()
+    ip = req.headers.get("cf-connecting-ip") if req is not None else None
+    if ip:   # Cloudflare's own client address, so the API's per-address limits see the real caller
+        h["X-Forwarded-For"] = ip
     return h
 
 
 def _need_key() -> dict | None:
-    if not API_KEY:
+    if not _key():
         return {"error": "no_api_key",
-                "message": "This tool needs a TILLA API key. Set the TILLA_API_KEY "
-                           "environment variable to a tk_live_... key.",
+                "message": ("This tool needs a TILLA API key. Send it as the X-API-Key header (or "
+                            "Authorization: Bearer <key>, or ?key=<key> on the URL)." if HOSTED else
+                            "This tool needs a TILLA API key. Set the TILLA_API_KEY "
+                            "environment variable to a tk_live_... key."),
                 "get_a_free_key": SIGNUP_URL}
     return None
 
@@ -293,11 +331,24 @@ TITLES = {
 }
 
 
-def build():
+def build(hosted: bool = False):
+    global _MCP, HOSTED
     from mcp.server.fastmcp import FastMCP
     from mcp.types import ToolAnnotations
+    kw = {}
+    if hosted:
+        # Stateless: every request stands alone and carries its own key. Only our own name (through the tunnel)
+        # and localhost may reach it - DNS-rebinding protection stays on.
+        from mcp.server.transport_security import TransportSecuritySettings
+        # log_level WARNING: no per-request access line, which would print a ?key= in plain text (the API logs
+        # every call itself).
+        kw = dict(stateless_http=True, log_level="WARNING", transport_security=TransportSecuritySettings(
+            enable_dns_rebinding_protection=True,
+            allowed_hosts=["mcp.tillacrypto.com", "127.0.0.1:*", "localhost:*"],
+            allowed_origins=["https://mcp.tillacrypto.com", "http://127.0.0.1:*", "http://localhost:*"]))
     mcp = FastMCP("tilla", host=os.environ.get("TILLA_MCP_HOST", "127.0.0.1"),
-                  port=int(os.environ.get("TILLA_MCP_PORT", "8971")), instructions=INSTRUCTIONS)
+                  port=int(os.environ.get("TILLA_MCP_PORT", "8971")), instructions=INSTRUCTIONS, **kw)
+    _MCP, HOSTED = mcp, hosted
     for fn in TOOLS:
         # Every tool only reads from the TILLA API: read-only, never destructive, safe to repeat, and it reaches
         # one outside service (the API), so openWorld.
@@ -318,9 +369,10 @@ def build():
 
 
 def main() -> None:
-    mcp = build()
     transport = os.environ.get("TILLA_MCP_TRANSPORT", "stdio").lower()
-    if transport in ("http", "streamable-http", "streamable_http"):
+    hosted = transport in ("http", "streamable-http", "streamable_http")
+    mcp = build(hosted)
+    if hosted:
         mcp.run(transport="streamable-http")
     else:
         mcp.run()  # stdio - the default for local agents
